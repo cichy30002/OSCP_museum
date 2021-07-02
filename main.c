@@ -4,14 +4,19 @@
 #include <time.h>
 #include <semaphore.h>
 #include <unistd.h>
+#include <limits.h>
+#include <errno.h>
 
-#define ASIZE 2
-#define BSIZE 1
-#define PEOPLE 5
+#define ATIMEBOUNDUP 5
+#define ATIMEBOUNDDOWN 1 
+#define BTIMEBOUNDUP 3
+#define BTIMEBOUNDDOWN 1
 
 sem_t HallA;
 sem_t HallB;
-
+int randint(int a, int b){
+	return rand()%(a-b+1)+b;
+}
 char timestamp[26]; 
 //some pretty time format from stack overflow
 void Timestamp(){
@@ -69,26 +74,42 @@ void* Bguy(void* arg){
 
 int main(int argc, char* argv[])
 {
+	if(argc != 4){
+		printf("%d",argc);
+		return 1;
+	}
+	char *p;
+	errno=0;
+	long conv = strtol(argv[1], &p, 10);
+	if (errno != 0 || *p != '\0' || conv > INT_MAX || conv < INT_MIN) return 2;
+	int population = conv;
+	conv = strtol(argv[2], &p, 10);
+	if (errno != 0 || *p != '\0' || conv > INT_MAX || conv < INT_MIN) return 2;
+	int sizeA = conv;
+	conv = strtol(argv[3], &p, 10);
+	if (errno != 0 || *p != '\0' || conv > INT_MAX || conv < INT_MIN) return 2;
+	int sizeB = conv;
+
 	srand(time(NULL));
-
-	sem_init(&HallA,0,ASIZE);
-	sem_init(&HallB,0,BSIZE);
 	
-	pthread_t people[PEOPLE];
+	sem_init(&HallA,0,sizeA);
+	sem_init(&HallB,0,sizeB);
+	
+	pthread_t people[population];
 
-	for(int i=0;i<PEOPLE;i++){
+	for(int i=0;i<population;i++){
 		int* x = malloc(sizeof(int)*2);
-		x[0] = rand()%3+1; 
-		if(i%2==0){
+		x[0] = randint(ATIMEBOUNDUP,ATIMEBOUNDDOWN); 
+		if(rand()%2==0){
 			x[1] = 0;
 			pthread_create(&people[i], NULL, Aguy, x);
 		}else{
-			x[1] = rand()%2+1;
+			x[1] = randint(BTIMEBOUNDUP,ATIMEBOUNDDOWN);
 			pthread_create(&people[i], NULL, Bguy, x);
 		}
 	}
 
-	for(int i=0;i<PEOPLE;i++){
+	for(int i=0;i<population;i++){
 		pthread_join(people[i], NULL);
 	}
 
