@@ -14,6 +14,8 @@
 
 sem_t HallA;
 sem_t HallB;
+int sizeA = 0;
+int sizeB = 0;
 int randint(int a, int b){
 	return rand()%(a-b+1)+b;
 }
@@ -33,6 +35,9 @@ void* Aguy(void* arg){
 	sem_wait(&HallA);
 
 	Timestamp();
+	//int semVal = 0;
+	//sem_getvalue(&HallA, &semVal);
+	//semVal = sizeA - semVal;
 	printf("[%s] enter A, times: %d %d\n",timestamp, *(int*)arg, *(int *)(arg+sizeof(int)));
 	sleep(*(int*)arg);
 	Timestamp();
@@ -49,19 +54,27 @@ void* Bguy(void* arg){
 	sem_wait(&HallA);
 	
 	Timestamp();
+	//int semValA = 0;
+	//sem_getvalue(&HallA,&semValA);
+	//semValA = sizeA - semValA;
 	printf("[%s] enter A, times: %d %d\n", timestamp, *(int*)arg, *(int*)(arg+sizeof(int)));
 	sleep(*(int*)arg);
 
 	sem_wait(&HallB);
-	sem_post(&HallA);
+	//sem_post(&HallA);
 	
 	Timestamp();
+	//int semValB = 0;
+	//sem_getvalue(&HallB,&semValB);
+	//semValB = sizeB - semValB;
 	printf("[%s] enter B\n", timestamp);
 	sleep(*(int*)(arg+sizeof(int)));
 	
-	sem_wait(&HallA);
+	//sem_wait(&HallA);
 	sem_post(&HallB);
 	
+	Timestamp();
+	printf("[%s] enter A once again\n", timestamp);	
 	sleep(1);
 	Timestamp();
 	printf("[%s] exit museum after B\n", timestamp);
@@ -85,10 +98,10 @@ int main(int argc, char* argv[])
 	int population = conv;
 	conv = strtol(argv[2], &p, 10);
 	if (errno != 0 || *p != '\0' || conv > INT_MAX || conv < INT_MIN) return 2;
-	int sizeA = conv;
+	sizeA = conv;
 	conv = strtol(argv[3], &p, 10);
 	if (errno != 0 || *p != '\0' || conv > INT_MAX || conv < INT_MIN) return 2;
-	int sizeB = conv;
+	sizeB = conv;
 
 	srand(time(NULL));
 	
