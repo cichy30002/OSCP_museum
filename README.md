@@ -16,9 +16,9 @@ program(s) implementing synchronization algorithm that will allow:
 2. leaving the museum by people visiting hall B in the shortest possible time.
 
 ## Solution
-Firstly we need to represent our museum in the program. So every guest will be a thread. I made 2 types of thread Just to make things simpler: we have a guest that want only watch Hall A and a guest who want to visit both (Aguy and Bguy). The halls are represented as semaphores - we need to be sure that there are only Na people in Hall A and Nb in Hall B. 
+Firstly we need to represent our museum in the program. So every guest will be a thread. I made 2 types of threads to make things simpler: we have a guest that wants to only watch Hall A and a guest who wants to visit both (Aguy and Bguy). The halls are represented as semaphores - we need to be sure that there are only Na people in Hall A and Nb in Hall B. 
 
-Then implementing simple solution is very easy - when there are space in hall that guest want to come he enter (sem_wait) and when he leave a hall it just go (sem_post). Watching the exhibition is implemented as sleep().
+Then implementing simple solution is very easy - when there is space in the hall the guest wants to come they enter (sem_wait) and then they leave the hall (sem_post). Watching the exhibition is implemented as sleep().
 ```C
 void* Bguy(void* arg){
 	sem_wait(&HallA);
